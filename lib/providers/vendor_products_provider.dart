@@ -46,7 +46,7 @@ class VendorProductsProvider extends ChangeNotifier {
     } catch (_) {}
   }
 
-  Future<void> fetchProducts({String? search}) async {
+  Future<void> fetchProducts({String? search, String? condition, String? packageTier}) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
@@ -54,6 +54,8 @@ class VendorProductsProvider extends ChangeNotifier {
     try {
       final Map<String, dynamic> params = {};
       if (search != null && search.isNotEmpty) params['search'] = search;
+      if (condition != null && condition.isNotEmpty) params['condition'] = condition;
+      if (packageTier != null && packageTier.isNotEmpty) params['package_tier'] = packageTier;
 
       final res = await apiClient.get(ApiEndpoints.products, queryParameters: params);
       if (res.data['status'] == true && res.data['data'] != null) {
@@ -99,25 +101,45 @@ class VendorProductsProvider extends ChangeNotifier {
   Future<bool> createProduct({
     required String name,
     required double price,
+    double? slashPrice,
     required int quantity,
     required int categoryId,
+    String condition = 'brand_new',
+    String packageTier = 'bike',
+    String warrantyType = 'in_store_testing',
     String? description,
+    String? videoUrl,
+    String? imageUrl,
   }) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
 
     try {
-      final res = await apiClient.post(
-        ApiEndpoints.products,
-        data: {
-          'name': name.trim(),
-          'unit_price': price,
-          'inventory_quantity': quantity,
-          'category_id': categoryId,
-          'description': description?.trim(),
-        },
-      );
+      final Map<String, dynamic> body = {
+        'name': name.trim(),
+        'unit_price': price,
+        'inventory_quantity': quantity,
+        'category_id': categoryId,
+        'condition': condition,
+        'package_tier': packageTier,
+        'warranty_type': warrantyType,
+      };
+
+      if (slashPrice != null && slashPrice > price) {
+        body['slash_price'] = slashPrice;
+      }
+      if (description != null && description.trim().isNotEmpty) {
+        body['description'] = description.trim();
+      }
+      if (videoUrl != null && videoUrl.trim().isNotEmpty) {
+        body['video_url'] = videoUrl.trim();
+      }
+      if (imageUrl != null && imageUrl.trim().isNotEmpty) {
+        body['image_url'] = imageUrl.trim();
+      }
+
+      final res = await apiClient.post(ApiEndpoints.products, data: body);
 
       if (res.data['status'] == true) {
         await fetchProducts();
