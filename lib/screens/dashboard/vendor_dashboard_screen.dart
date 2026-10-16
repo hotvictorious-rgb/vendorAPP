@@ -10,6 +10,7 @@ import '../../widgets/cooldown_hud_card.dart';
 import '../../widgets/inspection_code_dialog.dart';
 import '../account/vendor_account_screen.dart';
 import '../products/add_product_screen.dart';
+import '../returns/vendor_returns_screen.dart';
 
 class VendorDashboardScreen extends StatelessWidget {
   const VendorDashboardScreen({super.key});
@@ -57,7 +58,18 @@ class VendorDashboardScreen extends StatelessWidget {
         ),
         actions: [
           IconButton(
+            icon: const Icon(Icons.assignment_return_outlined, color: Colors.white),
+            tooltip: 'Inbound Returns',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const VendorReturnsScreen()),
+              );
+            },
+          ),
+          IconButton(
             icon: const Icon(Icons.person_outline, color: Colors.white),
+            tooltip: 'Account Settings',
             onPressed: () {
               Navigator.push(
                 context,
@@ -126,16 +138,16 @@ class VendorDashboardScreen extends StatelessWidget {
                   letterSpacing: 0.5,
                 ),
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 12),
 
               Row(
                 children: [
                   Expanded(
                     child: _buildMetricTile(
-                      title: 'Incoming / Ready',
-                      value: '${(data?.ordersBreakdown.processing ?? 0) + (data?.ordersBreakdown.readyForHandover ?? 0)}',
-                      subtitle: 'Active Orders',
-                      icon: Icons.local_shipping,
+                      title: 'Active Orders',
+                      value: '${data?.ordersBreakdown.processing ?? 0}',
+                      subtitle: 'Awaiting Courier Handover',
+                      icon: Icons.local_shipping_outlined,
                       iconColor: AppColors.primaryPurple,
                       bgColor: const Color(0xFFF3E8FF),
                     ),
@@ -243,6 +255,27 @@ class VendorDashboardScreen extends StatelessWidget {
                         ),
                       ],
                     ),
+                    const SizedBox(height: 10),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: const Color(0xFF9333EA),
+                          side: const BorderSide(color: Color(0xFFD8B4FE), width: 1.2),
+                          backgroundColor: const Color(0xFFFAF5FF),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        ),
+                        icon: const Icon(Icons.assignment_return_outlined, size: 18),
+                        label: const Text('Inbound Returns & Dispute Desk', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13)),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const VendorReturnsScreen()),
+                          );
+                        },
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -274,20 +307,27 @@ class VendorDashboardScreen extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Container(
-                padding: const EdgeInsets.all(7),
-                decoration: BoxDecoration(color: bgColor, borderRadius: BorderRadius.circular(8)),
-                child: Icon(icon, color: iconColor, size: 18),
-              ),
               Text(
-                value,
-                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                title,
+                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textSecondary),
+              ),
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(color: bgColor, borderRadius: BorderRadius.circular(8)),
+                child: Icon(icon, color: iconColor, size: 16),
               ),
             ],
           ),
-          const SizedBox(height: 10),
-          Text(title, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-          Text(subtitle, style: const TextStyle(fontSize: 10, color: AppColors.textSecondary)),
+          const SizedBox(height: 8),
+          Text(
+            value,
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: AppColors.textPrimary),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            subtitle,
+            style: const TextStyle(fontSize: 10, color: AppColors.textSecondary),
+          ),
         ],
       ),
     );

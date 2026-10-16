@@ -5,6 +5,7 @@ import '../../core/utils/currency_formatter.dart';
 import '../../models/vendor_order_model.dart';
 import '../../providers/vendor_orders_provider.dart';
 import '../../widgets/handover_otp_dialog.dart';
+import '../returns/vendor_returns_screen.dart';
 import 'vendor_order_detail_screen.dart';
 
 class VendorOrdersScreen extends StatelessWidget {
@@ -18,6 +19,18 @@ class VendorOrdersScreen extends StatelessWidget {
       backgroundColor: AppColors.scaffoldBackground,
       appBar: AppBar(
         title: const Text('Orders & Courier Handover'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.assignment_return_outlined, color: Colors.white),
+            tooltip: 'Inbound Returns & Disputes',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const VendorReturnsScreen()),
+              );
+            },
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -73,22 +86,43 @@ class VendorOrdersScreen extends StatelessWidget {
     required String status,
     required bool selected,
   }) {
-    return ChoiceChip(
-      label: Text(label),
+    final provider = context.read<VendorOrdersProvider>();
+
+    return FilterChip(
       selected: selected,
-      selectedColor: AppColors.primaryPurple,
-      backgroundColor: AppColors.scaffoldBackground,
+      label: Text(label),
       labelStyle: TextStyle(
-        color: selected ? Colors.white : AppColors.textPrimary,
-        fontWeight: FontWeight.w700,
         fontSize: 12,
+        fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
+        color: selected ? Colors.white : AppColors.textPrimary,
       ),
-      onSelected: (_) => context.read<VendorOrdersProvider>().setFilterStatus(status),
+      backgroundColor: AppColors.scaffoldBackground,
+      selectedColor: AppColors.primaryPurple,
+      showCheckmark: false,
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide(color: selected ? AppColors.primaryPurple : AppColors.border),
+      ),
+      onSelected: (_) => provider.setFilterStatus(status),
     );
   }
 
   Widget _buildOrderCard(BuildContext context, VendorOrderModel order) {
     final provider = context.read<VendorOrdersProvider>();
+
+    Color statusColor = AppColors.warning;
+    Color statusBg = const Color(0xFFFEF3C7);
+    String statusLabel = order.orderStatus.replaceAll('_', ' ').toUpperCase();
+
+    if (order.orderStatus == 'delivered') {
+      statusColor = AppColors.success;
+      statusBg = const Color(0xFFDCFCE7);
+    } else if (order.isReadyForHandover) {
+      statusColor = const Color(0xFF0D9488);
+      statusBg = const Color(0xFFCCFBF1);
+      statusLabel = 'READY FOR COURIER';
+    }
 
     return InkWell(
       onTap: () {
@@ -97,101 +131,108 @@ class VendorOrdersScreen extends StatelessWidget {
           MaterialPageRoute(builder: (_) => VendorOrderDetailScreen(order: order)),
         );
       },
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: BorderRadius.circular(16),
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(color: AppColors.border),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.02),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Order Number & Status Chip
+            // Top row: Order Number & Status
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  order.orderNumber,
-                  style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14, color: AppColors.primaryPurple),
+                  '#${order.orderNumber}',
+                  style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15, color: AppColors.textPrimary),
                 ),
-                _buildStatusChip(order.orderStatus),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(color: statusBg, borderRadius: BorderRadius.circular(6)),
+                  child: Text(
+                    statusLabel,
+                    style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: statusColor),
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 8),
 
-            // Customer & Items
+            // Customer info & fulfillment mode
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+                const Icon(Icons.person_outline, size: 14, color: AppColors.textSecondary),
+                const SizedBox(width: 4),
                 Text(
-                  '${order.customerName ?? 'Customer'} • ${order.items.length} item(s)',
-                  style: const TextStyle(fontSize: 12, color: AppColors.textSecondary, fontWeight: FontWeight.w600),
+                  order.customerName ?? 'Verified Customer',
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
                 ),
-                Text(
-                  CurrencyFormatter.format(order.grandTotal),
-                  style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14, color: AppColors.textPrimary),
+                const SizedBox(width: 10),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                  decoration: BoxDecoration(color: const Color(0xFFF3E8FF), borderRadius: BorderRadius.circular(4)),
+                  child: Text(
+                    order.fulfillmentType == 'doorstep_delivery' ? 'Delivery' : 'Pickup',
+                    style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w700, color: AppColors.primaryPurple),
+                  ),
                 ),
               ],
             ),
-            const SizedBox(height: 6),
+            const Divider(height: 18),
 
-            // Vendor Net 90%
-            Text(
-              'Net Payout (90%): ${CurrencyFormatter.format(order.vendorNet90)}',
-              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.success),
-            ),
-            const SizedBox(height: 12),
-
-            // Action Buttons Row
+            // Payout value & Action
             Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                if (!order.isReadyForHandover && order.orderStatus != 'delivered') ...[
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primaryPurple,
-                        padding: const EdgeInsets.symmetric(vertical: 9),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                      ),
-                      icon: const Icon(Icons.check_circle_outline, size: 15),
-                      label: const Text('Mark Ready for Courier', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
-                      onPressed: () async {
-                        final ok = await provider.markReadyForHandover(order.id);
-                        if (ok && context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('Order #${order.orderNumber} marked ready for dispatch.'),
-                              backgroundColor: AppColors.primaryPurple,
-                            ),
-                          );
-                        }
-                      },
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Merchant Net 90%', style: TextStyle(fontSize: 10, color: AppColors.textSecondary)),
+                    Text(
+                      CurrencyFormatter.format(order.vendorNet90),
+                      style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16, color: AppColors.success),
                     ),
-                  ),
-                ],
-                if (order.isReadyForHandover && order.orderStatus != 'delivered') ...[
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF0D9488),
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 9),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                      ),
-                      icon: const Icon(Icons.key, size: 15),
-                      label: const Text('Verify Handover PIN', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
-                      onPressed: () {
+                  ],
+                ),
+                if (order.orderStatus != 'delivered') ...[
+                  ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: order.isReadyForHandover ? const Color(0xFF0D9488) : AppColors.primaryPurple,
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      visualDensity: VisualDensity.compact,
+                    ),
+                    icon: Icon(order.isReadyForHandover ? Icons.key : Icons.check_circle_outline, size: 14),
+                    label: Text(
+                      order.isReadyForHandover ? 'Verify OTP' : 'Mark Ready',
+                      style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11, color: Colors.white),
+                    ),
+                    onPressed: () {
+                      if (order.isReadyForHandover) {
                         HandoverOtpDialog.show(
                           context,
                           orderId: order.id,
                           orderNumber: order.orderNumber,
                           onVerify: (otp) => provider.verifyHandoverOtp(order.id, otp),
                         );
-                      },
-                    ),
+                      } else {
+                        provider.markReadyForHandover(order.id);
+                      }
+                    },
                   ),
+                ] else ...[
+                  const Text('Completed', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textSecondary)),
                 ],
               ],
             ),
@@ -201,40 +242,24 @@ class VendorOrdersScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStatusChip(String status) {
-    Color bg = const Color(0xFFF3F4F6);
-    Color fg = const Color(0xFF374151);
-    String label = status.replaceAll('_', ' ').toUpperCase();
-
-    if (status == 'delivered') {
-      bg = const Color(0xFFDCFCE7);
-      fg = const Color(0xFF15803D);
-    } else if (status == 'ready_for_pickup') {
-      bg = const Color(0xFFFEF3C7);
-      fg = const Color(0xFFB45309);
-      label = 'READY FOR COURIER';
-    } else if (status == 'processing') {
-      bg = const Color(0xFFDBEAFE);
-      fg = const Color(0xFF1E40AF);
-    }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(6)),
-      child: Text(label, style: TextStyle(fontSize: 9, fontWeight: FontWeight.w800, color: fg)),
-    );
-  }
-
   Widget _buildEmptyState() {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: const [
-          Icon(Icons.inventory_2_outlined, size: 54, color: AppColors.textMuted),
-          SizedBox(height: 12),
-          Text('No orders in this queue', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15, color: AppColors.textPrimary)),
-          SizedBox(height: 4),
-          Text('New customer purchases will appear here live.', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+        children: [
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              border: Border.all(color: AppColors.border),
+            ),
+            child: const Icon(Icons.inbox_outlined, size: 48, color: AppColors.primaryPurple),
+          ),
+          const SizedBox(height: 16),
+          const Text('No Orders Found', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
+          const SizedBox(height: 4),
+          const Text('New orders placed by customers will appear here live.', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
         ],
       ),
     );

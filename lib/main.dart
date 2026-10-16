@@ -9,6 +9,7 @@ import 'providers/vendor_orders_provider.dart';
 import 'providers/vendor_reservations_provider.dart';
 import 'providers/vendor_products_provider.dart';
 import 'providers/vendor_payout_provider.dart';
+import 'providers/vendor_returns_provider.dart';
 import 'screens/auth/vendor_login_screen.dart';
 import 'screens/shell/vendor_shell_screen.dart';
 
@@ -48,6 +49,9 @@ void main() async {
         ),
         ChangeNotifierProvider(
           create: (_) => VendorPayoutProvider(apiClient: apiClient),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => VendorReturnsProvider(apiClient: apiClient),
         ),
       ],
       child: const VictoriousVendorApp(),

@@ -22,4 +22,8 @@ class ApiEndpoints {
   static const String payouts = '/api/v1/vendor/payouts';
   static const String updateBank = '/api/v1/vendor/bank/update';
   static const String categories = '/api/v1/categories';
+
+  // Inbound Returns & Counter-Dispute Desk
+  static const String returns = '/api/v1/vendor/returns';
+  static const String disputeReturn = '/api/v1/vendor/returns/'; // + {case_number}/dispute
 }
