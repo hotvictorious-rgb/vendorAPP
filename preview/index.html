@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Victorious MARKET — Merchant Terminal Mobile Simulator</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="icon" type="image/jpeg" href="assets/vm_icon.jpg">
+</head>
+<body>
+
+  <!-- Studio Header -->
+  <header class="studio-header">
+    <div class="brand-tag">
+      <i class="fa-solid fa-crown"></i> OFFICIAL MERCHANT &amp; BRANCH TERMINAL
+    </div>
+    <h1><span style="color: #ffd700;">Victorious</span> <span style="color: #ffffff;">MARKET</span> Seller Terminal</h1>
+    <p>FinTech-Grade Sovereign Omnichannel Retail &amp; In-Shop Inspection Desk</p>
+  </header>
+
+  <!-- Studio Controls & Quick Tabs -->
+  <div class="studio-controls">
+    <div class="status-indicator">
+      <div class="status-dot"></div>
+      <span id="backend-status-text">Backend Synchronized (127.0.0.1:8080)</span>
+    </div>
+    <div class="quick-nav-pills">
+      <button class="nav-pill-btn active" onclick="switchTab('dashboard')">Dashboard</button>
+      <button class="nav-pill-btn" onclick="switchTab('orders')">Orders &amp; Handover</button>
+      <button class="nav-pill-btn" onclick="switchTab('passes')">Inspection Passes</button>
+      <button class="nav-pill-btn" onclick="switchTab('products')">Catalog (+7d Freshness)</button>
+      <button class="nav-pill-btn" onclick="switchTab('payout')">Payout &amp; 48h Cooldown</button>
+      <button class="nav-pill-btn" onclick="openInspectionModal()">Sign Off Pass</button>
+    </div>
+  </div>
+
+  <!-- Smartphone Frame -->
+  <div class="phone-wrapper">
+    <div class="phone-screen">
+
+      <!-- Dynamic Island & Status Bar -->
+      <div class="phone-notch-area">
+        <span class="status-time">9:41</span>
+        <div class="dynamic-island">
+          <div class="island-camera"></div>
+          <div class="island-sensor"></div>
+        </div>
+        <div class="status-icons">
+          <i class="fa-solid fa-signal"></i>
+          <i class="fa-solid fa-wifi"></i>
+          <i class="fa-solid fa-battery-full"></i>
+        </div>
+      </div>
+
+      <!-- Scrollable Viewport -->
+      <main class="screen-viewport" id="viewport">
+
+        <!-- 1. DASHBOARD VIEW -->
+        <section class="screen-view active" id="view-dashboard">
+          <!-- App Bar -->
+          <div class="brand-app-bar">
+            <div class="bar-store-info">
+              <div class="store-badge-row">
+                <span class="store-title">Apex Retail Plaza</span>
+                <span class="verified-pill">VERIFIED</span>
+              </div>
+              <span class="store-loc">Uyo Commercial Corridor, Akwa Ibom</span>
+            </div>
+            <button class="icon-round-btn" onclick="switchTab('account')"><i class="fa-regular fa-user"></i></button>
+          </div>
+
+          <div class="screen-content">
+            <!-- Fintech Obsidian Balance Card -->
+            <div class="fintech-card">
+              <div class="card-glow"></div>
+              <div class="card-header-row">
+                <span class="escrow-badge"><i class="fa-solid fa-shield-halved"></i> SOVEREIGN 90% ESCROW</span>
+                <button class="eye-btn" onclick="toggleBalance()"><i class="fa-regular fa-eye" id="balance-eye-icon"></i></button>
+              </div>
+              <div class="merchant-name-label">Apex Retail Enterprises</div>
+              <div class="balance-figure" id="net-balance-text">₦ 284,500.00</div>
+              <div class="escrow-subtext">
+                <span class="amber-dot"></span> Pending Escrow: <strong id="pending-escrow-text">₦ 42,000.00</strong>
+              </div>
+              <div class="card-action-row">
+                <button class="gold-action-btn" onclick="openInspectionModal()">
+                  <i class="fa-solid fa-qrcode"></i> Inspection Pass
+                </button>
+                <button class="outline-action-btn" onclick="switchTab('orders')">
+                  <i class="fa-solid fa-truck"></i> Verify Courier
+                </button>
+              </div>
+            </div>
+
+            <!-- 48-Hour Bank Cooldown Warning HUD -->
+            <div class="cooldown-hud" id="cooldown-hud-banner">
+              <div class="hud-icon"><i class="fa-solid fa-shield-cat"></i></div>
+              <div class="hud-body">
+                <div class="hud-title-row">
+                  <span class="hud-title">48-Hour Bank Cooldown Active</span>
+                  <span class="hud-pill" id="cooldown-hours-pill">46h remaining</span>
+                </div>
+                <div class="hud-desc">
+                  Automated disbursements to Zenith Bank (******4756) are paused for anti-theft verification. Funds remain 100% safe in platform escrow.
+                </div>
+              </div>
+            </div>
+
+            <!-- Telemetry Metrics Grid -->
+            <div class="section-heading">STOREFRONT TELEMETRY</div>
+            <div class="metrics-grid">
+              <div class="metric-card" onclick="switchTab('orders')">
+                <div class="metric-top">
+                  <div class="metric-icon purple"><i class="fa-solid fa-box-open"></i></div>
+                  <span class="metric-num" id="orders-active-count">4</span>
+                </div>
+                <div class="metric-label">Active Orders</div>
+                <div class="metric-sub">Pending Handover</div>
+              </div>
+
+              <div class="metric-card" onclick="switchTab('passes')">
+                <div class="metric-top">
+                  <div class="metric-icon gold"><i class="fa-solid fa-ticket"></i></div>
+                  <span class="metric-num" id="passes-active-count">2</span>
+                </div>
+                <div class="metric-label">Inspection Passes</div>
+                <div class="metric-sub">₦0.00 Down In-Shop</div>
+              </div>
+
+              <div class="metric-card" onclick="switchTab('orders')">
+                <div class="metric-top">
+                  <div class="metric-icon green"><i class="fa-solid fa-circle-check"></i></div>
+                  <span class="metric-num">38</span>
+                </div>
+                <div class="metric-label">Delivered</div>
+                <div class="metric-sub">Handover Complete</div>
+              </div>
+
+              <div class="metric-card" onclick="switchTab('products')">
+                <div class="metric-top">
+                  <div class="metric-icon blue"><i class="fa-solid fa-cubes"></i></div>
+                  <span class="metric-num" id="products-active-count">12</span>
+                </div>
+                <div class="metric-label">Active Products</div>
+                <div class="metric-sub">7-Day Freshness</div>
+              </div>
+            </div>
+
+            <!-- Quick Action Pills Banner -->
+            <div class="quick-tools-box">
+              <div class="section-heading" style="margin-bottom: 8px;">TERMINAL QUICK ACTIONS</div>
+              <div class="tools-btn-row">
+                <button class="btn-primary" onclick="openAddProductModal()"><i class="fa-solid fa-plus"></i> Add Product</button>
+                <button class="btn-secondary" onclick="openInspectionModal()"><i class="fa-solid fa-badge-check"></i> Sign Off Pass</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 2. ORDERS VIEW -->
+        <section class="screen-view" id="view-orders">
+          <div class="brand-app-bar">
+            <span class="bar-title">Orders &amp; Courier Handover</span>
+          </div>
+
+          <div class="tab-filters-bar">
+            <button class="filter-pill active" onclick="filterOrders('all', this)">All</button>
+            <button class="filter-pill" onclick="filterOrders('processing', this)">Processing</button>
+            <button class="filter-pill" onclick="filterOrders('ready', this)">Ready for Courier</button>
+            <button class="filter-pill" onclick="filterOrders('delivered', this)">Delivered</button>
+          </div>
+
+          <div class="screen-content" id="orders-list-container">
+            <!-- Dynamic order cards injected via app.js -->
+          </div>
+        </section>
+
+        <!-- 3. INSPECTION PASSES VIEW -->
+        <section class="screen-view" id="view-passes">
+          <div class="brand-app-bar">
+            <span class="bar-title">In-Shop Inspection Passes</span>
+            <button class="icon-round-btn" onclick="openInspectionModal()"><i class="fa-solid fa-qrcode"></i></button>
+          </div>
+
+          <div class="screen-content" id="passes-list-container">
+            <!-- Dynamic inspection pass cards injected via app.js -->
+          </div>
+        </section>
+
+        <!-- 4. PRODUCTS VIEW -->
+        <section class="screen-view" id="view-products">
+          <div class="brand-app-bar">
+            <span class="bar-title">Catalog &amp; 7-Day Freshness</span>
+            <button class="icon-round-btn" onclick="openAddProductModal()"><i class="fa-solid fa-plus"></i></button>
+          </div>
+
+          <div class="screen-content" id="products-list-container">
+            <!-- Dynamic product cards injected via app.js -->
+          </div>
+        </section>
+
+        <!-- 5. PAYOUT & COOLDOWN VIEW -->
+        <section class="screen-view" id="view-payout">
+          <div class="brand-app-bar">
+            <span class="bar-title">Sovereign Payout &amp; Ledger</span>
+          </div>
+
+          <div class="screen-content">
+            <!-- Linked Bank Account Box -->
+            <div class="white-card">
+              <div class="card-header-row">
+                <span class="mini-label">LINKED SETTLEMENT ACCOUNT</span>
+                <button class="text-link-btn" onclick="openBankModal()"><i class="fa-solid fa-pen"></i> Edit Bank</button>
+              </div>
+              <div class="bank-name-large" id="payout-bank-name">Zenith Bank PLC</div>
+              <div class="account-number-display" id="payout-acc-num">******4756</div>
+              <div class="beneficiary-name" id="payout-acc-name">APEX RETAIL ENTERPRISES</div>
+              <hr class="thin-divider">
+              <div class="cooldown-status-row" id="payout-cooldown-badge">
+                <i class="fa-solid fa-shield"></i>
+                <span>48-Hour Cooldown Active: Next withdrawal unlocked in 46h.</span>
+              </div>
+            </div>
+
+            <!-- Ledger Sums -->
+            <div class="sums-row">
+              <div class="sum-box">
+                <div class="mini-label">Settled (Net 90%)</div>
+                <div class="sum-val green">₦ 284,500.00</div>
+              </div>
+              <div class="sum-box">
+                <div class="mini-label">Eligible Pending</div>
+                <div class="sum-val purple">₦ 42,000.00</div>
+              </div>
+            </div>
+
+            <!-- Settled Ledger Table -->
+            <div class="section-heading">SETTLED ORDERS AUDIT LOG</div>
+            <div class="white-card no-padding" id="settled-ledger-list">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+        </section>
+
+        <!-- 6. ACCOUNT / CONFIG VIEW -->
+        <section class="screen-view" id="view-account">
+          <div class="brand-app-bar">
+            <span class="bar-title">Storefront Settings</span>
+          </div>
+          <div class="screen-content">
+            <div class="white-card">
+              <div class="user-row">
+                <div class="user-avatar-circle"><i class="fa-solid fa-store"></i></div>
+                <div>
+                  <div class="user-name-title">Apex Retail Owner</div>
+                  <div class="user-sub">apex@example.com</div>
+                  <span class="role-pill">ROLE: VENDOR_MERCHANT</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="white-card" style="margin-top: 14px;">
+              <div class="mini-label">API SERVER ENDPOINT</div>
+              <div class="server-input-row">
+                <input type="text" id="api-server-url" value="http://127.0.0.1:8080" class="styled-input">
+                <button class="btn-save-sm" onclick="saveApiUrl()">Save</button>
+              </div>
+            </div>
+
+            <button class="btn-logout" onclick="switchTab('dashboard')"><i class="fa-solid fa-arrow-right-from-bracket"></i> Sign Out of Terminal</button>
+          </div>
+        </section>
+
+      </main>
+
+      <!-- Persistent Bottom Navigation Bar -->
+      <nav class="bottom-nav-bar">
+        <button class="nav-tab active" onclick="switchTab('dashboard')">
+          <i class="fa-solid fa-chart-pie"></i>
+          <span>Overview</span>
+        </button>
+        <button class="nav-tab" onclick="switchTab('orders')">
+          <i class="fa-solid fa-box"></i>
+          <span>Orders</span>
+        </button>
+        <button class="nav-tab" onclick="switchTab('passes')">
+          <i class="fa-solid fa-ticket"></i>
+          <span>Passes</span>
+        </button>
+        <button class="nav-tab" onclick="switchTab('products')">
+          <i class="fa-solid fa-cubes"></i>
+          <span>Catalog</span>
+        </button>
+        <button class="nav-tab" onclick="switchTab('payout')">
+          <i class="fa-solid fa-wallet"></i>
+          <span>Payouts</span>
+        </button>
+      </nav>
+
+    </div>
+  </div>
+
+  <!-- MODALS -->
+
+  <!-- 1. Handover OTP Modal -->
+  <div class="modal-backdrop" id="modal-handover">
+    <div class="modal-card">
+      <div class="modal-icon-header purple"><i class="fa-solid fa-lock"></i></div>
+      <div class="modal-title">Courier Handover PIN</div>
+      <div class="modal-subtitle" id="modal-handover-order-num">Order #VM-TEST-001</div>
+      <div class="modal-prompt">
+        Ask the assigned dispatch courier for their 6-digit handover PIN before releasing packages.
+      </div>
+      <input type="text" id="handover-pin-input" maxlength="6" placeholder="••••••" class="pin-input">
+      <div class="modal-btn-row">
+        <button class="btn-cancel" onclick="closeModals()">Cancel</button>
+        <button class="btn-confirm" onclick="submitHandoverPin()">Verify &amp; Release</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Inspection Signoff Modal -->
+  <div class="modal-backdrop" id="modal-inspection">
+    <div class="modal-card">
+      <div class="modal-icon-header gold"><i class="fa-solid fa-qrcode"></i></div>
+      <div class="modal-title">In-Shop Inspection Signoff</div>
+      <div class="modal-subtitle">₦0.00 Upfront Customer Reservation</div>
+      <div class="modal-prompt">
+        Enter the 8-character RES pass code presented by the shopper following physical examination.
+      </div>
+      <input type="text" id="inspection-code-input" placeholder="RES-XXXXXXXX" class="code-input">
+      <div class="modal-btn-row">
+        <button class="btn-cancel" onclick="closeModals()">Cancel</button>
+        <button class="btn-confirm" onclick="submitInspectionCode()">Confirm Inspection</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Add Product Modal -->
+  <div class="modal-backdrop" id="modal-add-product">
+    <div class="modal-card">
+      <div class="modal-title" style="margin-top: 0;">Add Product (+7d Freshness)</div>
+      <div class="form-group">
+        <label>PRODUCT TITLE</label>
+        <input type="text" id="new-prod-name" placeholder="e.g. Fresh Uyo Palm Oil (5L)" class="styled-input">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>PRICE (₦)</label>
+          <input type="number" id="new-prod-price" placeholder="12500" class="styled-input">
+        </div>
+        <div class="form-group">
+          <label>STOCK QTY</label>
+          <input type="number" id="new-prod-qty" placeholder="20" class="styled-input">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>CATEGORY</label>
+        <select id="new-prod-cat" class="styled-input">
+          <option>Fresh Food &amp; Groceries</option>
+          <option>Electronics</option>
+          <option>Fashion</option>
+        </select>
+      </div>
+      <div class="modal-btn-row">
+        <button class="btn-cancel" onclick="closeModals()">Cancel</button>
+        <button class="btn-confirm" onclick="submitAddProduct()">Publish</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Update Bank Modal -->
+  <div class="modal-backdrop" id="modal-update-bank">
+    <div class="modal-card">
+      <div class="modal-icon-header amber"><i class="fa-solid fa-shield-cat"></i></div>
+      <div class="modal-title">Update Bank Details</div>
+      <div class="modal-warning">
+        ⚠️ Anti-Fraud Notice: Updating bank details immediately triggers an automatic 48-hour security cooldown on disbursements.
+      </div>
+      <div class="form-group">
+        <label>BANK NAME</label>
+        <input type="text" id="new-bank-name" placeholder="e.g. Access Bank" class="styled-input">
+      </div>
+      <div class="form-group">
+        <label>10-DIGIT NUBAN ACCOUNT NUMBER</label>
+        <input type="text" id="new-bank-acc" maxlength="10" placeholder="0123456789" class="styled-input">
+      </div>
+      <div class="form-group">
+        <label>ACCOUNT BENEFICIARY NAME</label>
+        <input type="text" id="new-bank-beneficiary" placeholder="APEX RETAIL ENTERPRISES" class="styled-input">
+      </div>
+      <div class="modal-btn-row">
+        <button class="btn-cancel" onclick="closeModals()">Cancel</button>
+        <button class="btn-confirm" onclick="submitUpdateBank()">Update &amp; Activate 48h Cooldown</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

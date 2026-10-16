@@ -1,0 +1,42 @@
+name: vendor_app
+description: "Victorious MARKET - Official Merchant & Branch Terminal Mobile Application (Fintech-Grade Sovereign Omnichannel Retail)"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  # State Management (Rule: Provider is the sole permitted state management)
+  provider: ^6.1.2
+
+  # Networking & REST API Client
+  dio: ^5.4.3+1
+  
+  # Storage & Secure Persistence (Tokens, Preferences)
+  shared_preferences: ^2.2.3
+  flutter_secure_storage: ^9.2.2
+
+  # Typography & Media
+  google_fonts: ^6.2.1
+  cached_network_image: ^3.3.1
+  flutter_svg: ^2.0.10+1
+
+  # Utilities & QR
+  intl: ^0.19.0
+  shimmer: ^3.0.0
+  url_launcher: ^6.3.0
+  qr_flutter: ^4.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/
