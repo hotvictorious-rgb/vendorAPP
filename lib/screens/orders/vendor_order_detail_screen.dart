@@ -28,6 +28,42 @@ class VendorOrderDetailScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Delivery Halted Warning Banner
+            if (order.isHalted) ...[
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(14),
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFEF2F2),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: const Color(0xFFFCA5A5), width: 1.5),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.emergency_outlined, color: Color(0xFFDC2626), size: 24),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'TRANSIT HALTED BY FLEET LOGISTICS',
+                            style: TextStyle(fontWeight: FontWeight.w900, fontSize: 12, color: Color(0xFF991B1B)),
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            order.deliveryHaltedReason ?? 'Delivery temporarily halted due to incident or route curfew.',
+                            style: const TextStyle(fontSize: 11.5, color: Color(0xFF7F1D1D)),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+
             // Status & Financial Snapshot Card
             Container(
               padding: const EdgeInsets.all(16),

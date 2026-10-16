@@ -19,6 +19,8 @@ class VendorOrderModel {
   final String? deliveryAttemptPhotoPath;
   final int deliveryAttemptCount;
   final String? deliveryFailureReason;
+  final String? deliveryHaltedReason;
+  final String? deliveryHaltedAt;
   final List<DoorstepRejectionPhoto> doorstepRejectionPhotos;
   final List<VendorOrderItem> items;
   final String createdAt;
@@ -44,12 +46,15 @@ class VendorOrderModel {
     this.deliveryAttemptPhotoPath,
     this.deliveryAttemptCount = 0,
     this.deliveryFailureReason,
+    this.deliveryHaltedReason,
+    this.deliveryHaltedAt,
     this.doorstepRejectionPhotos = const [],
     required this.items,
     required this.createdAt,
   });
 
   bool get isReadyForHandover => vendorHandoverReadyAt != null || orderStatus == 'ready_for_pickup';
+  bool get isHalted => deliveryHaltedReason != null;
   bool get hasPhotoAudits =>
       pickupProofImage != null ||
       proofOfDeliveryImage != null ||
@@ -93,6 +98,8 @@ class VendorOrderModel {
       deliveryAttemptPhotoPath: json['delivery_attempt_photo_path'] as String?,
       deliveryAttemptCount: json['delivery_attempt_count'] as int? ?? 0,
       deliveryFailureReason: json['delivery_failure_reason'] as String?,
+      deliveryHaltedReason: json['delivery_halted_reason'] as String?,
+      deliveryHaltedAt: json['delivery_halted_at'] as String?,
       doorstepRejectionPhotos: rejectionPhotos,
       items: itemsList,
       createdAt: json['created_at'] as String? ?? '',
