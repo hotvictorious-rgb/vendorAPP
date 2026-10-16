@@ -4,18 +4,47 @@ import '../core/network/api_client.dart';
 import '../core/network/api_exceptions.dart';
 import '../models/vendor_product_model.dart';
 
+class CategoryItem {
+  final int id;
+  final String name;
+  final String? icon;
+
+  CategoryItem({required this.id, required this.name, this.icon});
+
+  factory CategoryItem.fromJson(Map<String, dynamic> json) {
+    return CategoryItem(
+      id: json['id'] as int? ?? 1,
+      name: json['name'] as String? ?? 'General',
+      icon: json['icon'] as String?,
+    );
+  }
+}
+
 class VendorProductsProvider extends ChangeNotifier {
   final ApiClient apiClient;
 
   List<VendorProductModel> _products = [];
+  List<CategoryItem> _categories = [];
   bool _isLoading = false;
   String? _errorMessage;
 
   List<VendorProductModel> get products => _products;
+  List<CategoryItem> get categories => _categories;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
   VendorProductsProvider({required this.apiClient});
+
+  Future<void> fetchCategories() async {
+    try {
+      final res = await apiClient.get(ApiEndpoints.categories);
+      if (res.data['status'] == true && res.data['data'] != null) {
+        final list = res.data['data'] as List;
+        _categories = list.map((e) => CategoryItem.fromJson(e as Map<String, dynamic>)).toList();
+        notifyListeners();
+      }
+    } catch (_) {}
+  }
 
   Future<void> fetchProducts({String? search}) async {
     _isLoading = true;

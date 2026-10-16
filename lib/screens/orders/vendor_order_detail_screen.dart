@@ -57,6 +57,7 @@ class VendorOrderDetailScreen extends StatelessWidget {
 
             // Customer Info Card
             Container(
+              width: double.infinity,
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -78,7 +79,7 @@ class VendorOrderDetailScreen extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(color: const Color(0xFFF3E8FF), borderRadius: BorderRadius.circular(6)),
                     child: Text(
-                      order.fulfillmentType == 'doorstep_delivery' ? '🚚 Directional Doorstep Delivery' : '🏪 In-Shop Customer Pickup',
+                      order.fulfillmentType == 'doorstep_delivery' ? '🚀 Directional Doorstep Delivery' : '🏪 In-Shop Customer Pickup',
                       style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.primaryPurple),
                     ),
                   ),
@@ -86,6 +87,64 @@ class VendorOrderDetailScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
+
+            // Assigned Dispatch Courier Card (if courier assigned by fleet)
+            if (order.riderName != null) ...[
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: AppColors.border),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('ASSIGNED DISPATCH COURIER', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: AppColors.textSecondary)),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFDCFCE7),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Icon(Icons.two_wheeler, color: Color(0xFF15803D)),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(order.riderName!, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14)),
+                              if (order.riderPhone != null)
+                                Text(order.riderPhone!, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                            ],
+                          ),
+                        ),
+                        if (order.riderPlateNumber != null)
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: AppColors.scaffoldBackground,
+                              borderRadius: BorderRadius.circular(6),
+                              border: Border.all(color: AppColors.border),
+                            ),
+                            child: Text(
+                              order.riderPlateNumber!,
+                              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
 
             // Itemized Products
             const Text('PURCHASED LINE ITEMS', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppColors.textSecondary)),

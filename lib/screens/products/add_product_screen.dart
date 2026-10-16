@@ -18,6 +18,14 @@ class _AddProductScreenState extends State<AddProductScreen> {
   int _selectedCategoryId = 1;
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<VendorProductsProvider>().fetchCategories();
+    });
+  }
+
+  @override
   void dispose() {
     _nameController.dispose();
     _priceController.dispose();
@@ -73,6 +81,17 @@ class _AddProductScreenState extends State<AddProductScreen> {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<VendorProductsProvider>();
+
+    // Dynamic categories from backend with default fallback
+    final categories = provider.categories.isNotEmpty
+        ? provider.categories.map((c) => DropdownMenuItem<int>(value: c.id, child: Text(c.name))).toList()
+        : const [
+            DropdownMenuItem(value: 1, child: Text('Fresh Food & Farm Produce')),
+            DropdownMenuItem(value: 2, child: Text('Electronics & Appliances')),
+            DropdownMenuItem(value: 3, child: Text('Fashion & Apparel')),
+            DropdownMenuItem(value: 4, child: Text('Health & Beauty')),
+            DropdownMenuItem(value: 5, child: Text('Home & Living')),
+          ];
 
     return Scaffold(
       backgroundColor: AppColors.scaffoldBackground,
@@ -156,19 +175,15 @@ class _AddProductScreenState extends State<AddProductScreen> {
                   const Text('CATEGORY *', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textSecondary)),
                   const SizedBox(height: 6),
                   DropdownButtonFormField<int>(
-                    value: _selectedCategoryId,
+                    value: categories.any((item) => item.value == _selectedCategoryId)
+                        ? _selectedCategoryId
+                        : (categories.isNotEmpty ? categories.first.value : 1),
                     decoration: InputDecoration(
                       filled: true,
                       fillColor: AppColors.scaffoldBackground,
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: AppColors.border)),
                     ),
-                    items: const [
-                      DropdownMenuItem(value: 1, child: Text('Fresh Food & Farm Produce')),
-                      DropdownMenuItem(value: 2, child: Text('Electronics & Appliances')),
-                      DropdownMenuItem(value: 3, child: Text('Fashion & Apparel')),
-                      DropdownMenuItem(value: 4, child: Text('Health & Beauty')),
-                      DropdownMenuItem(value: 5, child: Text('Home & Living')),
-                    ],
+                    items: categories,
                     onChanged: (v) => setState(() => _selectedCategoryId = v ?? 1),
                   ),
                   const SizedBox(height: 16),
