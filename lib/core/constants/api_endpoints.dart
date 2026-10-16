@@ -26,4 +26,11 @@ class ApiEndpoints {
   // Inbound Returns & Counter-Dispute Desk
   static const String returns = '/api/v1/vendor/returns';
   static const String disputeReturn = '/api/v1/vendor/returns/'; // + {case_number}/dispute
+
+  static String resolveImageUrl(String? path) {
+    if (path == null || path.isEmpty) return '';
+    if (path.startsWith('http://') || path.startsWith('https://')) return path;
+    final cleanPath = path.startsWith('/') ? path.substring(1) : path;
+    return '$defaultBaseUrl/$cleanPath';
+  }
 }

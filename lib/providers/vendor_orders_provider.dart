@@ -11,16 +11,23 @@ class VendorOrdersProvider extends ChangeNotifier {
   bool _isLoading = false;
   String? _errorMessage;
   String _selectedStatus = 'all';
+  String _searchQuery = '';
 
   List<VendorOrderModel> get orders => _orders;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   String get selectedStatus => _selectedStatus;
+  String get searchQuery => _searchQuery;
 
   VendorOrdersProvider({required this.apiClient});
 
   void setFilterStatus(String status) {
     _selectedStatus = status;
+    fetchOrders();
+  }
+
+  void setSearchQuery(String query) {
+    _searchQuery = query.trim();
     fetchOrders();
   }
 
@@ -33,6 +40,9 @@ class VendorOrdersProvider extends ChangeNotifier {
       final Map<String, dynamic> params = {};
       if (_selectedStatus != 'all') {
         params['status'] = _selectedStatus;
+      }
+      if (_searchQuery.isNotEmpty) {
+        params['search'] = _searchQuery;
       }
 
       final res = await apiClient.get(ApiEndpoints.orders, queryParameters: params);
@@ -70,17 +80,15 @@ class VendorOrdersProvider extends ChangeNotifier {
           'otp': otp.trim(),
         },
       );
-
       if (res.data['status'] == true) {
         await fetchOrders();
-        return {'success': true, 'message': res.data['message'] ?? 'Handover verified successfully!'};
-      } else {
-        return {'success': false, 'message': res.data['message'] ?? 'Verification failed.'};
+        return {'success': true, 'message': res.data['message'] ?? 'Handover verified.'};
       }
+      return {'success': false, 'message': res.data['message'] ?? 'Verification failed.'};
     } on ApiException catch (e) {
       return {'success': false, 'message': e.message};
     } catch (_) {
-      return {'success': false, 'message': 'Handover verification failed. Please check network.'};
+      return {'success': false, 'message': 'Handover confirmation network error.'};
     }
   }
 }

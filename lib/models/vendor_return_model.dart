@@ -11,6 +11,7 @@ class VendorReturnModel {
   final String totalRefundableAmount;
   final String? vendorReturnOtp;
   final String? doorstepPhotoPath;
+  final String? vendorReturnPhotoPath;
   final String? returnedToVendorAt;
   final String? returnedByRiderName;
   final String? returnedByRiderPhone;
@@ -37,6 +38,7 @@ class VendorReturnModel {
     required this.totalRefundableAmount,
     this.vendorReturnOtp,
     this.doorstepPhotoPath,
+    this.vendorReturnPhotoPath,
     this.returnedToVendorAt,
     this.returnedByRiderName,
     this.returnedByRiderPhone,
@@ -55,6 +57,7 @@ class VendorReturnModel {
   bool get isReturnedToShop => status == 'returned_to_vendor';
   bool get isDisputed => vendorDisputed || status == 'disputed_by_vendor';
   bool get isResolved => status == 'resolved' || status == 'refunded' || status == 'closed';
+  bool get hasEvidencePhotos => doorstepPhotoPath != null || vendorReturnPhotoPath != null || vendorDisputePhotoPath != null || items.any((i) => i.defectPhotoPath != null);
 
   factory VendorReturnModel.fromJson(Map<String, dynamic> json) {
     final order = json['order'] as Map<String, dynamic>?;
@@ -74,6 +77,7 @@ class VendorReturnModel {
       totalRefundableAmount: json['total_refundable_amount']?.toString() ?? '0.00',
       vendorReturnOtp: json['vendor_return_otp'] as String?,
       doorstepPhotoPath: json['doorstep_photo_path'] as String?,
+      vendorReturnPhotoPath: json['vendor_return_photo_path'] as String?,
       returnedToVendorAt: json['returned_to_vendor_at'] as String?,
       returnedByRiderName: rider?['name'] as String?,
       returnedByRiderPhone: rider?['phone'] as String?,
@@ -99,6 +103,7 @@ class VendorReturnItem {
   final String itemCondition;
   final String status;
   final String? thumbnail;
+  final String? defectPhotoPath;
 
   VendorReturnItem({
     required this.id,
@@ -109,6 +114,7 @@ class VendorReturnItem {
     required this.itemCondition,
     required this.status,
     this.thumbnail,
+    this.defectPhotoPath,
   });
 
   factory VendorReturnItem.fromJson(Map<String, dynamic> json) {
@@ -123,6 +129,7 @@ class VendorReturnItem {
       itemCondition: json['item_condition'] as String? ?? 'opened_tested',
       status: json['status'] as String? ?? 'requested',
       thumbnail: product?['thumbnail'] as String? ?? product?['image_path'] as String?,
+      defectPhotoPath: json['defect_photo_path'] as String?,
     );
   }
 }

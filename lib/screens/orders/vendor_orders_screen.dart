@@ -8,8 +8,22 @@ import '../../widgets/handover_otp_dialog.dart';
 import '../returns/vendor_returns_screen.dart';
 import 'vendor_order_detail_screen.dart';
 
-class VendorOrdersScreen extends StatelessWidget {
+class VendorOrdersScreen extends StatefulWidget {
   const VendorOrdersScreen({super.key});
+
+  @override
+  State<VendorOrdersScreen> createState() => _VendorOrdersScreenState();
+}
+
+class _VendorOrdersScreenState extends State<VendorOrdersScreen> {
+  final TextEditingController _searchController = TextEditingController();
+  bool _isSearchExpanded = false;
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -18,8 +32,35 @@ class VendorOrdersScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.scaffoldBackground,
       appBar: AppBar(
-        title: const Text('Orders & Courier Handover'),
+        title: _isSearchExpanded
+            ? TextField(
+                controller: _searchController,
+                autofocus: true,
+                style: const TextStyle(color: Colors.white, fontSize: 14),
+                decoration: const InputDecoration(
+                  hintText: 'Search order #, customer, phone...',
+                  hintStyle: TextStyle(color: Colors.white70, fontSize: 14),
+                  border: InputBorder.none,
+                ),
+                onSubmitted: (val) => provider.setSearchQuery(val),
+              )
+            : const Text('Orders & Courier Handover'),
         actions: [
+          IconButton(
+            icon: Icon(_isSearchExpanded ? Icons.close : Icons.search, color: Colors.white),
+            tooltip: _isSearchExpanded ? 'Close Search' : 'Search Orders',
+            onPressed: () {
+              setState(() {
+                if (_isSearchExpanded) {
+                  _isSearchExpanded = false;
+                  _searchController.clear();
+                  provider.setSearchQuery('');
+                } else {
+                  _isSearchExpanded = true;
+                }
+              });
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.assignment_return_outlined, color: Colors.white),
             tooltip: 'Inbound Returns & Disputes',
@@ -54,6 +95,32 @@ class VendorOrdersScreen extends StatelessWidget {
             ),
           ),
           const Divider(height: 1, color: AppColors.border),
+
+          // Active Search Indicator
+          if (provider.searchQuery.isNotEmpty) ...[
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              color: const Color(0xFFF1F5F9),
+              child: Row(
+                children: [
+                  const Icon(Icons.filter_alt_outlined, size: 14, color: AppColors.textSecondary),
+                  const SizedBox(width: 6),
+                  Text(
+                    'Search: "${provider.searchQuery}"',
+                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                  ),
+                  const Spacer(),
+                  GestureDetector(
+                    onTap: () {
+                      _searchController.clear();
+                      provider.setSearchQuery('');
+                    },
+                    child: const Text('Clear', style: TextStyle(fontSize: 12, color: AppColors.primaryPurple, fontWeight: FontWeight.w700)),
+                  ),
+                ],
+              ),
+            ),
+          ],
 
           // Orders List
           Expanded(
@@ -153,9 +220,34 @@ class VendorOrdersScreen extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  '#${order.orderNumber}',
-                  style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15, color: AppColors.textPrimary),
+                Row(
+                  children: [
+                    Text(
+                      '#${order.orderNumber}',
+                      style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15, color: AppColors.textPrimary),
+                    ),
+                    if (order.hasPhotoAudits) ...[
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFEEF2FF),
+                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(color: const Color(0xFFC7D2FE)),
+                        ),
+                        child: const Row(
+                          children: [
+                            Icon(Icons.photo_camera, size: 10, color: Color(0xFF4338CA)),
+                            SizedBox(width: 2),
+                            Text(
+                              'Proof Snaps',
+                              style: TextStyle(fontSize: 9, fontWeight: FontWeight.w800, color: Color(0xFF4338CA)),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
@@ -186,6 +278,11 @@ class VendorOrdersScreen extends StatelessWidget {
                     order.fulfillmentType == 'doorstep_delivery' ? 'Delivery' : 'Pickup',
                     style: const TextStyle(fontSize: 9, fontWeight: FontWeight.w700, color: AppColors.primaryPurple),
                   ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  '${order.items.length} ${order.items.length == 1 ? 'item' : 'items'}',
+                  style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
                 ),
               ],
             ),
@@ -259,7 +356,7 @@ class VendorOrdersScreen extends StatelessWidget {
           const SizedBox(height: 16),
           const Text('No Orders Found', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
           const SizedBox(height: 4),
-          const Text('New orders placed by customers will appear here live.', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+          const Text('Orders matching your filter or search will appear here live.', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
         ],
       ),
     );
