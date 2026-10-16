@@ -50,19 +50,15 @@ class VendorAuthProvider extends ChangeNotifier {
         final token = data['token'] as String;
         final user = UserModel.fromJson(data['user'] as Map<String, dynamic>);
 
-        // STRICT MATHEMATICAL ROLE INVARIANT:
+        // STRICT MATHEMATICAL ROLE INVARIANT & ZERO-KNOWLEDGE ERROR:
         // P(Authentication Success | user.userType != 'vendor') = 0.
         // It is mathematically impossible for any non-vendor (customers, riders, logistics,
         // admins, and specifically vendor employees / counter staff) to establish an authenticated
         // session on this terminal. Even with valid credentials, non-vendor tokens are wiped immediately.
-        // Counter staff and workers must authenticate exclusively through the Web Staff Portal.
+        // The error message is strictly uniform: it does not confirm the password or reveal the role.
         if (user.userType != 'vendor') {
           await storageService.clearAll();
-          if (user.userType == 'vendor_employee') {
-            _errorMessage = 'Access Restricted: Branch employees and counter staff are strictly prohibited from this Mobile Terminal. Please sign in via the Web Staff Portal (/counter).';
-          } else {
-            _errorMessage = 'Access Denied: Only verified Sovereign Merchant Owners can access this terminal.';
-          }
+          _errorMessage = 'Invalid merchant credentials or unauthorized terminal access.';
           _isLoading = false;
           notifyListeners();
           return false;
@@ -76,12 +72,16 @@ class VendorAuthProvider extends ChangeNotifier {
         notifyListeners();
         return true;
       } else {
-        _errorMessage = res.data['message'] ?? 'Login failed. Please check credentials.';
+        _errorMessage = 'Invalid merchant credentials or unauthorized terminal access.';
       }
     } on ApiException catch (e) {
-      _errorMessage = e.message;
-    } catch (e) {
-      _errorMessage = 'Connection error. Please ensure the newVmarket backend server is running.';
+      if (e.statusCode == 401 || e.statusCode == 403) {
+        _errorMessage = 'Invalid merchant credentials or unauthorized terminal access.';
+      } else {
+        _errorMessage = e.message;
+      }
+    } catch (_) {
+      _errorMessage = 'Unable to connect to merchant services. Please check network connection.';
     }
 
     _isLoading = false;
