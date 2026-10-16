@@ -17,6 +17,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
   final _quantityController = TextEditingController(text: '10');
   final _descriptionController = TextEditingController();
   final _videoUrlController = TextEditingController();
+  final _imageUrlController = TextEditingController();
 
   int _selectedCategoryId = 1;
   String _condition = 'brand_new';
@@ -39,6 +40,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
     _quantityController.dispose();
     _descriptionController.dispose();
     _videoUrlController.dispose();
+    _imageUrlController.dispose();
     super.dispose();
   }
 
@@ -80,6 +82,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
       warrantyType: _warrantyType,
       description: _descriptionController.text.trim(),
       videoUrl: _videoUrlController.text.trim(),
+      imageUrl: _imageUrlController.text.trim().isNotEmpty ? _imageUrlController.text.trim() : null,
     );
 
     if (!mounted) return;
@@ -323,6 +326,21 @@ class _AddProductScreenState extends State<AddProductScreen> {
                       DropdownMenuItem(value: 'as_is', child: Text('Sold As-Is (No Warranty After Testing)')),
                     ],
                     onChanged: (v) => setState(() => _warrantyType = v ?? 'in_store_testing'),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Optional Product Image / Photo URL
+                  const Text('PRODUCT IMAGE / PHOTO URL (OPTIONAL)', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textSecondary)),
+                  const SizedBox(height: 6),
+                  TextField(
+                    controller: _imageUrlController,
+                    decoration: InputDecoration(
+                      hintText: 'https://images.unsplash.com/... or https://res.cloudinary.com/...',
+                      prefixIcon: const Icon(Icons.image_outlined, size: 18),
+                      filled: true,
+                      fillColor: AppColors.scaffoldBackground,
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: AppColors.border)),
+                    ),
                   ),
                   const SizedBox(height: 16),
 
