@@ -63,6 +63,19 @@ class StorageService {
     return _prefs.getString(AppConstants.baseUrlKey) ?? ApiEndpoints.defaultBaseUrl;
   }
 
+  // Device Token for FCM Multi-Channel Notifications
+  String? getDeviceToken() {
+    return _prefs.getString('vm_vendor_device_token');
+  }
+
+  Future<void> setDeviceToken(String token) async {
+    await _prefs.setString('vm_vendor_device_token', token);
+  }
+
+  Future<void> clearDeviceToken() async {
+    await _prefs.remove('vm_vendor_device_token');
+  }
+
   Future<void> clearAll() async {
     await clearToken();
     await clearUser();

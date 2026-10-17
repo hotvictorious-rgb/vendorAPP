@@ -11,6 +11,8 @@ import '../../widgets/inspection_code_dialog.dart';
 import '../account/vendor_account_screen.dart';
 import '../products/add_product_screen.dart';
 import '../returns/vendor_returns_screen.dart';
+import '../../providers/vendor_notification_provider.dart';
+import '../notifications/vendor_notifications_screen.dart';
 
 class VendorDashboardScreen extends StatelessWidget {
   const VendorDashboardScreen({super.key});
@@ -57,6 +59,25 @@ class VendorDashboardScreen extends StatelessWidget {
           ],
         ),
         actions: [
+          Consumer<VendorNotificationProvider>(
+            builder: (context, notif, _) {
+              return IconButton(
+                icon: Badge(
+                  isLabelVisible: notif.unreadCount > 0,
+                  label: Text("${notif.unreadCount > 99 ? "99+" : notif.unreadCount}"),
+                  backgroundColor: AppColors.error,
+                  child: const Icon(Icons.notifications_outlined, color: Colors.white),
+                ),
+                tooltip: 'Store Alerts & OTPs',
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const VendorNotificationsScreen()),
+                  );
+                },
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.assignment_return_outlined, color: Colors.white),
             tooltip: 'Inbound Returns',

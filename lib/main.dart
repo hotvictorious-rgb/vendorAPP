@@ -10,6 +10,8 @@ import 'providers/vendor_reservations_provider.dart';
 import 'providers/vendor_products_provider.dart';
 import 'providers/vendor_payout_provider.dart';
 import 'providers/vendor_returns_provider.dart';
+import 'providers/vendor_notification_provider.dart';
+import 'core/services/firebase_notification_service.dart';
 import 'screens/auth/vendor_login_screen.dart';
 import 'screens/shell/vendor_shell_screen.dart';
 
@@ -20,6 +22,12 @@ void main() async {
   await storageService.init();
 
   final apiClient = ApiClient(storageService: storageService);
+
+  // Background registration of merchant terminal with notification matrix
+  FirebaseNotificationService.instance.registerWithBackend(
+    apiClient: apiClient,
+    storage: storageService,
+  );
 
   runApp(
     MultiProvider(
@@ -52,6 +60,9 @@ void main() async {
         ),
         ChangeNotifierProvider(
           create: (_) => VendorReturnsProvider(apiClient: apiClient),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => VendorNotificationProvider(apiClient)..fetchNotifications(),
         ),
       ],
       child: const VictoriousVendorApp(),

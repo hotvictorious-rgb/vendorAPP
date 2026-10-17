@@ -25,6 +25,13 @@ class ApiEndpoints {
   static const String updateBank = '/api/v1/vendor/bank/update';
   static const String categories = '/api/v1/categories';
 
+  // Multi-Channel Notifications & FCM Push Gateway
+  static const String deviceToken = '/api/v1/notifications/device-token';
+  static const String registerDeviceToken = '/api/v1/notifications/device-token';
+  static const String revokeDeviceToken = '/api/v1/notifications/device-token';
+  static const String inAppNotifications = '/api/v1/notifications/in-app';
+  static const String markNotificationRead = '/api/v1/notifications/mark-read';
+
   // Inbound Returns & Counter-Dispute Desk
   static const String returns = '/api/v1/vendor/returns';
   static const String disputeReturn = '/api/v1/vendor/returns/'; // + {case_number}/dispute

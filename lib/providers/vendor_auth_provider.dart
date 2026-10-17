@@ -1,7 +1,8 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import '../core/constants/api_endpoints.dart';
 import '../core/network/api_client.dart';
 import '../core/network/api_exceptions.dart';
+import '../core/services/firebase_notification_service.dart';
 import '../core/services/storage_service.dart';
 import '../models/user_model.dart';
 
@@ -24,6 +25,10 @@ class VendorAuthProvider extends ChangeNotifier {
     final user = storageService.getUser();
     if (user != null && user.userType == 'vendor') {
       _currentUser = user;
+      FirebaseNotificationService.instance.registerWithBackend(
+        apiClient: apiClient,
+        storage: storageService,
+      );
     } else {
       await storageService.clearAll();
       _currentUser = null;
@@ -68,6 +73,12 @@ class VendorAuthProvider extends ChangeNotifier {
         await storageService.saveUser(user);
         _currentUser = user;
 
+        // Register merchant device token with backend FCM matrix
+        FirebaseNotificationService.instance.registerWithBackend(
+          apiClient: apiClient,
+          storage: storageService,
+        );
+
         _isLoading = false;
         notifyListeners();
         return true;
@@ -90,6 +101,10 @@ class VendorAuthProvider extends ChangeNotifier {
   }
 
   Future<void> logout() async {
+    await FirebaseNotificationService.instance.unregisterWithBackend(
+      apiClient: apiClient,
+      storage: storageService,
+    );
     await storageService.clearAll();
     _currentUser = null;
     notifyListeners();
