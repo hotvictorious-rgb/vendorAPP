@@ -93,6 +93,11 @@ class FinancialMetrics {
   final String net90Earnings;
   final String settledAmount;
   final String pendingEscrow;
+  final String withdrawableBalance;
+  final String escrowHeldBalance;
+  final String pendingPayoutBalance;
+  final String totalSettledBalance;
+  final String unrecoveredDebt;
   final String currency;
   final String currencySymbol;
 
@@ -101,6 +106,11 @@ class FinancialMetrics {
     required this.net90Earnings,
     required this.settledAmount,
     required this.pendingEscrow,
+    required this.withdrawableBalance,
+    required this.escrowHeldBalance,
+    required this.pendingPayoutBalance,
+    required this.totalSettledBalance,
+    required this.unrecoveredDebt,
     required this.currency,
     required this.currencySymbol,
   });
@@ -111,6 +121,11 @@ class FinancialMetrics {
       net90Earnings: json['net_90_earnings']?.toString() ?? '0.00',
       settledAmount: json['settled_amount']?.toString() ?? '0.00',
       pendingEscrow: json['pending_escrow']?.toString() ?? '0.00',
+      withdrawableBalance: json['withdrawable_balance']?.toString() ?? '0.00',
+      escrowHeldBalance: json['escrow_held_balance']?.toString() ?? '0.00',
+      pendingPayoutBalance: json['pending_payout_balance']?.toString() ?? '0.00',
+      totalSettledBalance: json['total_settled_balance']?.toString() ?? '0.00',
+      unrecoveredDebt: json['unrecovered_debt']?.toString() ?? '0.00',
       currency: json['currency'] as String? ?? 'NGN',
       currencySymbol: json['currency_symbol'] as String? ?? '₦',
     );

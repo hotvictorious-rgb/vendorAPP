@@ -17,9 +17,11 @@ class ApiEndpoints {
   static const String pickupReservations = '/api/v1/vendor/pickup-reservations';
   static const String verifyInspection = '/api/v1/vendor/pickup-reservations/verify-inspection';
   static const String products = '/api/v1/vendor/products';
+  static const String updateProduct = '/api/v1/vendor/products/'; // + {id}
   static const String refreshFreshness = '/api/v1/vendor/products/'; // + {id}/freshness
   static const String toggleStock = '/api/v1/vendor/products/'; // + {id}/toggle-stock
   static const String payouts = '/api/v1/vendor/payouts';
+  static const String requestPayout = '/api/v1/vendor/payouts';
   static const String updateBank = '/api/v1/vendor/bank/update';
   static const String categories = '/api/v1/categories';
 

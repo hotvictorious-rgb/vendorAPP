@@ -99,6 +99,7 @@ class VendorDashboardScreen extends StatelessWidget {
                 businessName: data?.merchant.businessName ?? auth.currentUser?.name ?? 'Merchant',
                 netEarnings: data?.financialMetrics.net90Earnings ?? '0.00',
                 pendingEscrow: data?.financialMetrics.pendingEscrow ?? '0.00',
+                withdrawableBalance: data?.financialMetrics.withdrawableBalance,
                 isBalanceVisible: dash.isBalanceVisible,
                 onToggleVisibility: dash.toggleBalanceVisibility,
                 onScanInspection: () {

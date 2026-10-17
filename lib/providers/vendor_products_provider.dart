@@ -113,6 +113,7 @@ class VendorProductsProvider extends ChangeNotifier {
     String? videoUrl,
     String? imageUrl,
     File? imageFile,
+    List<File>? galleryFiles,
   }) async {
     _isLoading = true;
     _errorMessage = null;
@@ -143,12 +144,23 @@ class VendorProductsProvider extends ChangeNotifier {
       }
 
       dynamic payload = body;
-      if (imageFile != null) {
-        body['image'] = await MultipartFile.fromFile(
-          imageFile.path,
-          filename: 'prod_${DateTime.now().millisecondsSinceEpoch}.jpg',
-        );
-        payload = FormData.fromMap(body);
+      if (imageFile != null || (galleryFiles != null && galleryFiles.isNotEmpty)) {
+        final formMap = Map<String, dynamic>.from(body);
+        if (imageFile != null) {
+          formMap['image'] = await MultipartFile.fromFile(
+            imageFile.path,
+            filename: 'prod_${DateTime.now().millisecondsSinceEpoch}.jpg',
+          );
+        }
+        if (galleryFiles != null && galleryFiles.isNotEmpty) {
+          for (int i = 0; i < galleryFiles.length; i++) {
+            formMap['images[$i]'] = await MultipartFile.fromFile(
+              galleryFiles[i].path,
+              filename: 'gallery_${i}_${DateTime.now().millisecondsSinceEpoch}.jpg',
+            );
+          }
+        }
+        payload = FormData.fromMap(formMap);
       }
 
       final res = await apiClient.post(ApiEndpoints.products, data: payload);
@@ -163,6 +175,89 @@ class VendorProductsProvider extends ChangeNotifier {
       _errorMessage = e.message;
     } catch (_) {
       _errorMessage = 'Failed to publish product.';
+    }
+
+    _isLoading = false;
+    notifyListeners();
+    return false;
+  }
+
+  Future<bool> updateProduct({
+    required int productId,
+    required String name,
+    required double price,
+    double? slashPrice,
+    required int quantity,
+    required int categoryId,
+    String condition = 'brand_new',
+    String packageTier = 'bike',
+    String warrantyType = 'in_store_testing',
+    String? description,
+    String? videoUrl,
+    String? imageUrl,
+    File? imageFile,
+    List<File>? galleryFiles,
+  }) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final Map<String, dynamic> body = {
+        'name': name.trim(),
+        'unit_price': price,
+        'inventory_quantity': quantity,
+        'category_id': categoryId,
+        'condition': condition,
+        'package_tier': packageTier,
+        'warranty_type': warrantyType,
+      };
+
+      if (slashPrice != null && slashPrice > 0) {
+        body['slash_price'] = slashPrice;
+      }
+      if (description != null && description.trim().isNotEmpty) {
+        body['description'] = description.trim();
+      }
+      if (videoUrl != null && videoUrl.trim().isNotEmpty) {
+        body['video_url'] = videoUrl.trim();
+      }
+      if (imageUrl != null && imageUrl.trim().isNotEmpty) {
+        body['image_url'] = imageUrl.trim();
+      }
+
+      dynamic payload = body;
+      if (imageFile != null || (galleryFiles != null && galleryFiles.isNotEmpty)) {
+        final formMap = Map<String, dynamic>.from(body);
+        if (imageFile != null) {
+          formMap['image'] = await MultipartFile.fromFile(
+            imageFile.path,
+            filename: 'prod_${DateTime.now().millisecondsSinceEpoch}.jpg',
+          );
+        }
+        if (galleryFiles != null && galleryFiles.isNotEmpty) {
+          for (int i = 0; i < galleryFiles.length; i++) {
+            formMap['images[$i]'] = await MultipartFile.fromFile(
+              galleryFiles[i].path,
+              filename: 'gallery_${i}_${DateTime.now().millisecondsSinceEpoch}.jpg',
+            );
+          }
+        }
+        payload = FormData.fromMap(formMap);
+      }
+
+      final res = await apiClient.post('${ApiEndpoints.updateProduct}$productId', data: payload);
+
+      if (res.data['status'] == true) {
+        await fetchProducts();
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      }
+    } on ApiException catch (e) {
+      _errorMessage = e.message;
+    } catch (_) {
+      _errorMessage = 'Failed to update product.';
     }
 
     _isLoading = false;

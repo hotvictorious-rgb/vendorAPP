@@ -40,11 +40,12 @@ class ApiClient {
           int? statusCode = response?.statusCode;
           dynamic errors;
 
+          dynamic serverData;
           if (response != null && response.data != null) {
-            final data = response.data;
-            if (data is Map<String, dynamic>) {
-              message = data['message'] ?? message;
-              errors = data['errors'];
+            serverData = response.data;
+            if (serverData is Map<String, dynamic>) {
+              message = serverData['message'] ?? message;
+              errors = serverData['errors'];
             }
           }
 
@@ -56,7 +57,9 @@ class ApiClient {
           } else if (statusCode == 401) {
             message = 'Authentication required or session expired.';
           } else if (statusCode == 403) {
-            message = 'Access denied. You do not have permission for this action.';
+            if (serverData is! Map<String, dynamic> || serverData['message'] == null) {
+              message = 'Access denied. You do not have permission for this action.';
+            }
           }
 
           final customException = ApiException(

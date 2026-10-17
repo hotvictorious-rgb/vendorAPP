@@ -6,6 +6,7 @@ class FintechBalanceCard extends StatelessWidget {
   final String businessName;
   final String netEarnings;
   final String pendingEscrow;
+  final String? withdrawableBalance;
   final bool isBalanceVisible;
   final VoidCallback onToggleVisibility;
   final VoidCallback onScanInspection;
@@ -16,6 +17,7 @@ class FintechBalanceCard extends StatelessWidget {
     required this.businessName,
     required this.netEarnings,
     required this.pendingEscrow,
+    this.withdrawableBalance,
     required this.isBalanceVisible,
     required this.onToggleVisibility,
     required this.onScanInspection,
@@ -127,7 +129,7 @@ class FintechBalanceCard extends StatelessWidget {
                 // Net 90% Available Balance
                 Text(
                   isBalanceVisible
-                      ? CurrencyFormatter.format(netEarnings)
+                      ? CurrencyFormatter.format(withdrawableBalance ?? netEarnings)
                       : '₦ • • • • • •',
                   style: const TextStyle(
                     color: Colors.white,
@@ -138,9 +140,23 @@ class FintechBalanceCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
 
-                // Pending Escrow Sub-label
+                // Escrow & Cleared Sub-label
                 Row(
                   children: [
+                    Container(
+                      width: 6,
+                      height: 6,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFF10B981),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 5),
+                    Text(
+                      withdrawableBalance != null ? 'Cleared' : 'Net Sales',
+                      style: const TextStyle(color: Color(0xFF34D399), fontSize: 11, fontWeight: FontWeight.w700),
+                    ),
+                    const SizedBox(width: 8),
                     Container(
                       width: 6,
                       height: 6,
@@ -149,9 +165,9 @@ class FintechBalanceCard extends StatelessWidget {
                         shape: BoxShape.circle,
                       ),
                     ),
-                    const SizedBox(width: 6),
+                    const SizedBox(width: 5),
                     Text(
-                      'Pending Escrow: ${isBalanceVisible ? CurrencyFormatter.format(pendingEscrow) : '₦ ••••'}',
+                      'Escrow: ${isBalanceVisible ? CurrencyFormatter.format(pendingEscrow) : '₦ ••••'}',
                       style: const TextStyle(
                         color: Color(0xFFD1D5DB),
                         fontSize: 11,

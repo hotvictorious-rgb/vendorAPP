@@ -75,4 +75,41 @@ class VendorPayoutProvider extends ChangeNotifier {
       return {'success': false, 'message': 'Network error while updating bank details.'};
     }
   }
+
+  Future<Map<String, dynamic>> requestPayout(double amount) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final res = await apiClient.post(
+        ApiEndpoints.requestPayout,
+        data: {'amount': amount},
+      );
+
+      _isLoading = false;
+      notifyListeners();
+
+      if (res.data['status'] == true) {
+        await fetchPayouts();
+        return {
+          'success': true,
+          'message': res.data['message'] ?? 'Payout request submitted successfully.'
+        };
+      } else {
+        return {
+          'success': false,
+          'message': res.data['message'] ?? 'Payout request could not be processed.'
+        };
+      }
+    } on ApiException catch (e) {
+      _isLoading = false;
+      notifyListeners();
+      return {'success': false, 'message': e.message};
+    } catch (_) {
+      _isLoading = false;
+      notifyListeners();
+      return {'success': false, 'message': 'Network error while requesting payout.'};
+    }
+  }
 }

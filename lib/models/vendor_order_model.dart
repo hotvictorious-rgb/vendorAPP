@@ -11,6 +11,7 @@ class VendorOrderModel {
   final String? pickupVerificationCode;
   final String? vendorHandoverReadyAt;
   final bool pickupConfirmedByRider;
+  final String? logisticsCompanyName;
   final String? riderName;
   final String? riderPhone;
   final String? riderPlateNumber;
@@ -38,6 +39,7 @@ class VendorOrderModel {
     this.pickupVerificationCode,
     this.vendorHandoverReadyAt,
     required this.pickupConfirmedByRider,
+    this.logisticsCompanyName,
     this.riderName,
     this.riderPhone,
     this.riderPlateNumber,
@@ -66,6 +68,7 @@ class VendorOrderModel {
     final customer = json['customer'] as Map<String, dynamic>?;
     final rider = json['rider'] as Map<String, dynamic>?;
     final riderUser = rider?['user'] as Map<String, dynamic>?;
+    final logisticsCompany = json['logistics_company'] as Map<String, dynamic>? ?? json['logisticsCompany'] as Map<String, dynamic>?;
 
     final rawItems = json['items'] as List? ?? json['order_items'] as List? ?? [];
     final itemsList = rawItems.map((e) => VendorOrderItem.fromJson(e as Map<String, dynamic>)).toList();
@@ -90,6 +93,7 @@ class VendorOrderModel {
       pickupVerificationCode: json['pickup_verification_code'] as String?,
       vendorHandoverReadyAt: json['vendor_handover_ready_at'] as String?,
       pickupConfirmedByRider: json['pickup_confirmed_by_rider'] as bool? ?? false,
+      logisticsCompanyName: logisticsCompany?['company_name'] as String?,
       riderName: riderUser?['name'] as String?,
       riderPhone: riderUser?['phone'] as String?,
       riderPlateNumber: rider?['plate_number'] as String?,

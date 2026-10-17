@@ -159,6 +159,11 @@ class VendorOrderDetailScreen extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(order.riderName!, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14)),
+                              if (order.logisticsCompanyName != null)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 2),
+                                  child: Text('Fleet: ${order.logisticsCompanyName!}', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.primaryPurple)),
+                                ),
                               if (order.riderPhone != null)
                                 Text(order.riderPhone!, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
                             ],
