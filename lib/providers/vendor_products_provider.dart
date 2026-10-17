@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import '../core/constants/api_endpoints.dart';
 import '../core/network/api_client.dart';
@@ -110,6 +112,7 @@ class VendorProductsProvider extends ChangeNotifier {
     String? description,
     String? videoUrl,
     String? imageUrl,
+    File? imageFile,
   }) async {
     _isLoading = true;
     _errorMessage = null;
@@ -139,7 +142,16 @@ class VendorProductsProvider extends ChangeNotifier {
         body['image_url'] = imageUrl.trim();
       }
 
-      final res = await apiClient.post(ApiEndpoints.products, data: body);
+      dynamic payload = body;
+      if (imageFile != null) {
+        body['image'] = await MultipartFile.fromFile(
+          imageFile.path,
+          filename: 'prod_${DateTime.now().millisecondsSinceEpoch}.jpg',
+        );
+        payload = FormData.fromMap(body);
+      }
+
+      final res = await apiClient.post(ApiEndpoints.products, data: payload);
 
       if (res.data['status'] == true) {
         await fetchProducts();

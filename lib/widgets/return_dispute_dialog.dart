@@ -1,14 +1,17 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import '../core/constants/app_colors.dart';
+import '../core/services/vendor_image_picker_service.dart';
 import '../models/vendor_return_model.dart';
 
 class ReturnDisputeDialog {
   static void show(
     BuildContext context, {
     required VendorReturnModel returnCase,
-    required Future<Map<String, dynamic>> Function(String reason) onSubmitDispute,
+    required Future<Map<String, dynamic>> Function(String reason, File? disputePhoto) onSubmitDispute,
   }) {
     final reasonController = TextEditingController();
+    File? pickedPhoto;
     bool isSubmitting = false;
     String? localError;
 
@@ -147,6 +150,91 @@ class ReturnDisputeDialog {
                       ),
                     ),
 
+                    const SizedBox(height: 14),
+
+                    // Physical Photo Evidence Picker
+                    const Text(
+                      'MERCHANT PHYSICAL COUNTER-PROOF (RECOMMENDED)',
+                      style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: AppColors.textSecondary),
+                    ),
+                    const SizedBox(height: 6),
+
+                    if (pickedPhoto != null)
+                      Container(
+                        margin: const EdgeInsets.only(bottom: 10),
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: AppColors.scaffoldBackground,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: AppColors.border),
+                        ),
+                        child: Row(
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(6),
+                              child: Image.file(
+                                pickedPhoto!,
+                                width: 50,
+                                height: 50,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            const Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('Counter-Proof Attached', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                                  Text('Evidence will be escalated to Super Admin', style: TextStyle(fontSize: 10, color: AppColors.textSecondary)),
+                                ],
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.close, color: AppColors.error, size: 18),
+                              onPressed: () => setState(() => pickedPhoto = null),
+                            ),
+                          ],
+                        ),
+                      )
+                    else
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton.icon(
+                              style: OutlinedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(vertical: 10),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                              ),
+                              icon: const Icon(Icons.camera_alt, size: 16, color: AppColors.primaryPurple),
+                              label: const Text('Snap Photo', style: TextStyle(fontSize: 12, color: AppColors.primaryPurple)),
+                              onPressed: () async {
+                                final photo = await VendorImagePickerService.pickFromCamera();
+                                if (photo != null) {
+                                  setState(() => pickedPhoto = photo);
+                                }
+                              },
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: OutlinedButton.icon(
+                              style: OutlinedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(vertical: 10),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                              ),
+                              icon: const Icon(Icons.photo_library, size: 16, color: AppColors.textSecondary),
+                              label: const Text('From Gallery', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                              onPressed: () async {
+                                final photo = await VendorImagePickerService.pickFromGallery();
+                                if (photo != null) {
+                                  setState(() => pickedPhoto = photo);
+                                }
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+
                     if (localError != null) ...[
                       const SizedBox(height: 8),
                       Text(localError!, style: const TextStyle(color: AppColors.error, fontSize: 11, fontWeight: FontWeight.w600)),
@@ -185,7 +273,7 @@ class ReturnDisputeDialog {
                                   localError = null;
                                 });
 
-                                final res = await onSubmitDispute(text);
+                                final res = await onSubmitDispute(text, pickedPhoto);
 
                                 if (res['success'] == true) {
                                   Navigator.pop(modalContext);

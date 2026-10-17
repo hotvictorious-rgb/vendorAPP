@@ -1,6 +1,8 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
+import '../../core/services/vendor_image_picker_service.dart';
 import '../../providers/vendor_products_provider.dart';
 
 class AddProductScreen extends StatefulWidget {
@@ -19,6 +21,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
   final _videoUrlController = TextEditingController();
   final _imageUrlController = TextEditingController();
 
+  File? _pickedImage;
   int _selectedCategoryId = 1;
   String _condition = 'brand_new';
   String _packageTier = 'bike';
@@ -83,6 +86,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
       description: _descriptionController.text.trim(),
       videoUrl: _videoUrlController.text.trim(),
       imageUrl: _imageUrlController.text.trim().isNotEmpty ? _imageUrlController.text.trim() : null,
+      imageFile: _pickedImage,
     );
 
     if (!mounted) return;
@@ -109,15 +113,12 @@ class _AddProductScreenState extends State<AddProductScreen> {
   Widget build(BuildContext context) {
     final provider = context.watch<VendorProductsProvider>();
 
-    final categories = provider.categories.isNotEmpty
-        ? provider.categories.map((c) => DropdownMenuItem<int>(value: c.id, child: Text(c.name))).toList()
-        : const [
-            DropdownMenuItem(value: 1, child: Text('Fresh Food & Farm Produce')),
-            DropdownMenuItem(value: 2, child: Text('Electronics & Appliances')),
-            DropdownMenuItem(value: 3, child: Text('Fashion & Apparel')),
-            DropdownMenuItem(value: 4, child: Text('Health & Beauty')),
-            DropdownMenuItem(value: 5, child: Text('Home & Living')),
-          ];
+    final categories = provider.categories
+        .map((c) => DropdownMenuItem<int>(
+              value: c.id,
+              child: Text(c.name, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+            ))
+        .toList();
 
     return Scaffold(
       backgroundColor: AppColors.scaffoldBackground,
@@ -329,20 +330,106 @@ class _AddProductScreenState extends State<AddProductScreen> {
                   ),
                   const SizedBox(height: 16),
 
-                  // Optional Product Image / Photo URL
-                  const Text('PRODUCT IMAGE / PHOTO URL (OPTIONAL)', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textSecondary)),
-                  const SizedBox(height: 6),
-                  TextField(
-                    controller: _imageUrlController,
-                    decoration: InputDecoration(
-                      hintText: 'https://images.unsplash.com/... or https://res.cloudinary.com/...',
-                      prefixIcon: const Icon(Icons.image_outlined, size: 18),
-                      filled: true,
-                      fillColor: AppColors.scaffoldBackground,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: AppColors.border)),
+                  // Product Photo Picker (Camera or Gallery)
+                  const Text('PRODUCT PHOTO (CAMERA / GALLERY)', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textSecondary)),
+                  const SizedBox(height: 8),
+
+                  if (_pickedImage != null)
+                    Container(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: AppColors.scaffoldBackground,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: AppColors.border),
+                      ),
+                      child: Row(
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: Image.file(
+                              _pickedImage!,
+                              width: 60,
+                              height: 60,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          const Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('Product Photo Selected', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                                Text('Will be optimized for mobile catalog view', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                              ],
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.delete_outline, color: AppColors.error),
+                            onPressed: () => setState(() => _pickedImage = null),
+                          ),
+                        ],
+                      ),
+                    )
+                  else
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                              side: const BorderSide(color: AppColors.primaryPurple),
+                            ),
+                            icon: const Icon(Icons.camera_alt, size: 18, color: AppColors.primaryPurple),
+                            label: const Text('Take Photo', style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.bold, color: AppColors.primaryPurple)),
+                            onPressed: () async {
+                              final photo = await VendorImagePickerService.pickFromCamera();
+                              if (photo != null) {
+                                setState(() => _pickedImage = photo);
+                              }
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                              side: const BorderSide(color: AppColors.border),
+                            ),
+                            icon: const Icon(Icons.photo_library, size: 18, color: AppColors.textSecondary),
+                            label: const Text('From Gallery', style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.bold, color: AppColors.textSecondary)),
+                            onPressed: () async {
+                              final photo = await VendorImagePickerService.pickFromGallery();
+                              if (photo != null) {
+                                setState(() => _pickedImage = photo);
+                              }
+                            },
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                  const SizedBox(height: 16),
+
+                  const SizedBox(height: 12),
+
+                  // Optional Image URL Fallback
+                  if (_pickedImage == null) ...[
+                    const Text('OR PASTE IMAGE URL (CDN / HOSTED)', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.textSecondary)),
+                    const SizedBox(height: 4),
+                    TextField(
+                      controller: _imageUrlController,
+                      decoration: InputDecoration(
+                        hintText: 'https://images.unsplash.com/... or https://res.cloudinary.com/...',
+                        prefixIcon: const Icon(Icons.link, size: 18),
+                        filled: true,
+                        fillColor: AppColors.scaffoldBackground,
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: AppColors.border)),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                  ],
 
                   // Optional YouTube Video
                   const Text('YOUTUBE UNBOXING / DEMO VIDEO (OPTIONAL)', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textSecondary)),
@@ -404,16 +491,16 @@ class _AddProductScreenState extends State<AddProductScreen> {
     required VoidCallback onTap,
   }) {
     return InkWell(
+      borderRadius: BorderRadius.circular(12),
       onTap: onTap,
-      borderRadius: BorderRadius.circular(10),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
-          color: selected ? const Color(0xFFF3E8FF) : AppColors.scaffoldBackground,
-          borderRadius: BorderRadius.circular(10),
+          color: selected ? AppColors.primaryPurple.withOpacity(0.08) : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: selected ? AppColors.primaryPurple : AppColors.border,
-            width: selected ? 1.8 : 1,
+            width: selected ? 1.8 : 1.0,
           ),
         ),
         child: Column(
@@ -423,7 +510,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
               label,
               style: TextStyle(
                 fontWeight: FontWeight.w800,
-                fontSize: 13,
+                fontSize: 12.5,
                 color: selected ? AppColors.primaryPurple : AppColors.textPrimary,
               ),
             ),
@@ -432,7 +519,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
               sub,
               style: TextStyle(
                 fontSize: 10,
-                color: selected ? const Color(0xFF6B21A8) : AppColors.textSecondary,
+                color: selected ? AppColors.primaryPurple : AppColors.textSecondary,
               ),
             ),
           ],

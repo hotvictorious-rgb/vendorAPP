@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import '../core/constants/api_endpoints.dart';
 import '../core/network/api_client.dart';
@@ -53,17 +55,31 @@ class VendorReturnsProvider extends ChangeNotifier {
   Future<Map<String, dynamic>> disputeReturn({
     required String caseNumber,
     required String disputeReason,
+    File? disputePhoto,
   }) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
 
     try {
+      dynamic payload;
+      if (disputePhoto != null) {
+        payload = FormData.fromMap({
+          'dispute_reason': disputeReason.trim(),
+          'dispute_photo': await MultipartFile.fromFile(
+            disputePhoto.path,
+            filename: 'dispute_${caseNumber}.jpg',
+          ),
+        });
+      } else {
+        payload = {
+          'dispute_reason': disputeReason.trim(),
+        };
+      }
+
       final res = await apiClient.post(
         '${ApiEndpoints.disputeReturn}$caseNumber/dispute',
-        data: {
-          'dispute_reason': disputeReason.trim(),
-        },
+        data: payload,
       );
 
       _isLoading = false;
