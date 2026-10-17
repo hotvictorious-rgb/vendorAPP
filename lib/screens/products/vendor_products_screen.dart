@@ -355,9 +355,30 @@ class _VendorProductsScreenState extends State<VendorProductsScreen> {
           ),
           const SizedBox(height: 10),
 
-          // Freshness Refresh Action
+          // Action Buttons: Edit Product + Confirm Freshness
           Row(
             children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.textPrimary,
+                    side: const BorderSide(color: AppColors.border, width: 1.2),
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
+                  icon: const Icon(Icons.edit_outlined, size: 15),
+                  label: const Text('Edit Product', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => AddProductScreen(productToEdit: product),
+                      ),
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(width: 8),
               Expanded(
                 child: OutlinedButton.icon(
                   style: OutlinedButton.styleFrom(
@@ -367,7 +388,7 @@ class _VendorProductsScreenState extends State<VendorProductsScreen> {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   ),
                   icon: const Icon(Icons.refresh, size: 15),
-                  label: const Text('Confirm Freshness (+7 Days)', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
+                  label: const Text('Confirm Freshness', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
                   onPressed: () async {
                     final ok = await provider.refreshFreshness(product.id);
                     if (ok && context.mounted) {
